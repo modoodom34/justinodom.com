@@ -122,6 +122,11 @@ class Game3D {
     this.score = 0;
     this.lives = 7;
     this.combo = 0;
+    
+    // Update lives display immediately
+    if (document.getElementById('lives')) {
+      document.getElementById('lives').textContent = '7';
+    }
 
     // Input handling setup
     this.keys = { left: false, right: false };
@@ -133,6 +138,107 @@ class Game3D {
     document.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
     document.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
     document.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+
+    // Add mobile touch controls
+    if (this.isMobile) {
+      this.createMobileControls();
+    }
+  }
+
+  createMobileControls() {
+    const controlsContainer = document.createElement('div');
+    controlsContainer.id = 'mobileControls';
+    controlsContainer.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 1000;
+      pointer-events: none;
+    `;
+
+    // Left control
+    const leftControl = document.createElement('div');
+    leftControl.style.cssText = `
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      pointer-events: auto;
+      user-select: none;
+      -webkit-user-select: none;
+    `;
+    leftControl.innerHTML = '←';
+
+    // Right control
+    const rightControl = document.createElement('div');
+    rightControl.style.cssText = leftControl.style.cssText;
+    rightControl.innerHTML = '→';
+
+    // Add touch event listeners
+    leftControl.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      this.keys.left = true;
+    });
+
+    leftControl.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      this.keys.left = false;
+    });
+
+    rightControl.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      this.keys.right = true;
+    });
+
+    rightControl.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      this.keys.right = false;
+    });
+
+    controlsContainer.appendChild(leftControl);
+    controlsContainer.appendChild(rightControl);
+    document.body.appendChild(controlsContainer);
+  }
+
+  handleTouchStart(e) {
+    e.preventDefault();
+    if (this.gameState === 'start' || this.gameState === 'gameover') {
+      this.startGame();
+      return;
+    }
+  }
+
+  handleTouchMove(e) {
+    e.preventDefault();
+    if (!this.isMobile || e.touches.length === 0) return;
+    
+    const touch = e.touches[0];
+    const windowWidth = window.innerWidth;
+    const paddleWidth = this.paddle.scale.x;
+    
+    // Calculate paddle position based on touch position
+    const touchX = (touch.clientX / windowWidth) * 2 - 1;
+    const paddleX = touchX * (this.boundaries.right - paddleWidth/2);
+    
+    // Clamp paddle position within boundaries
+    this.paddle.position.x = Math.max(
+      this.boundaries.left + paddleWidth/2,
+      Math.min(this.boundaries.right - paddleWidth/2, paddleX)
+    );
+  }
+
+  handleTouchEnd(e) {
+    e.preventDefault();
   }
 
   createFullscreenButton() {
@@ -488,6 +594,14 @@ class Game3D {
     this.createBricks();
     this.createStarfield();
     this.createGrid();
+    
+    // Initialize game state if not already set
+    if (typeof this.lives === 'undefined') {
+      this.lives = 7;
+      if (document.getElementById('lives')) {
+        document.getElementById('lives').textContent = '7';
+      }
+    }
   }
 
   createBricks() {
@@ -1524,25 +1638,21 @@ class Game3D {
 
   handleTouchMove(e) {
     e.preventDefault();
-    if (this.gameState === 'playing') {
-      const touch = e.touches[0];
-      const rect = this.renderer.domElement.getBoundingClientRect();
-      const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-      
-      // Convert to world coordinates with smoother movement
-      const targetX = x * (this.gameWidth / 2 * 0.95);
-      this.paddle.position.x += (targetX - this.paddle.position.x) * 0.2;
-      
-      // Clamp paddle position with same boundaries
-      this.paddle.position.x = Math.max(
-        this.boundaries.left + 6,
-        Math.min(this.boundaries.right - 6, this.paddle.position.x)
-      );
-
-      if (!this.ballLaunched) {
-        this.ball.position.x = this.paddle.position.x;
-      }
-    }
+    if (!this.isMobile || e.touches.length === 0) return;
+    
+    const touch = e.touches[0];
+    const windowWidth = window.innerWidth;
+    const paddleWidth = this.paddle.scale.x;
+    
+    // Calculate paddle position based on touch position
+    const touchX = (touch.clientX / windowWidth) * 2 - 1;
+    const paddleX = touchX * (this.boundaries.right - paddleWidth/2);
+    
+    // Clamp paddle position within boundaries
+    this.paddle.position.x = Math.max(
+      this.boundaries.left + paddleWidth/2,
+      Math.min(this.boundaries.right - paddleWidth/2, paddleX)
+    );
   }
 
   handleTouchEnd(e) {
@@ -1814,7 +1924,6 @@ class Game3D {
         if ((row + col) % 2 === 0 || Math.random() > 0.7) {
           const x = (col - cols/2 + 0.5) * 2.5;
           const y = 12 - row * 1.5;
-          // Add some randomization to z position for 3D effect
           const z = (Math.random() - 0.5) * 2;
           this.createBrick(
             x,
