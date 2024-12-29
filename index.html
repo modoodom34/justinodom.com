@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>justinodom.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script async src="https://unpkg.com/es-module-shims/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    #gameCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .bottom-logo {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 5px;
+      text-align: center;
+      z-index: 10000;
+      font-size: 0.6em;
+      color: #00ffff;
+      font-family: 'Press Start 2P', cursive;
+      text-shadow: 0 0 10px #00ffff;
+      opacity: 0.8;
+      pointer-events: none;
+      margin: 0;
+      padding: 0;
+    }
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  
+  
+
+    <div class="game-ui">
+      <div class="stats-container">
+        <div class="score">score:<span id="score">0</span></div>
+        <div class="lives">lives:<span id="lives">3</span></div>
+      </div>
+    </div>
+
+    <div id="startScreen" class="screen">
+      <div class="status-text">press space to start</div>
+    </div>
+
+    <div id="gameOverScreen" class="screen hidden">
+      <div class="data-corruption">system failure</div>
+      <div class="status-text">press space to restart</div>
+      <a href="mailto:justin@justinodom.com" class="glitch-button primary-cta">contact justin now</a>
+    </div>
+
+    <div class="corner-elements">
+      <div class="corner top-left"></div>
+      <div class="corner top-right"></div>
+      <div class="corner bottom-left"></div>
+      <div class="corner bottom-right"></div>
+    </div>
+  </div>
+
+  <p class="bottom-logo">justinodom.com | lose and learn</p>
+
+  <script type="module" src="game3d.js"></script>
+</body>
+</html>
